@@ -263,6 +263,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   renderProducts();
   renderCart();
+  
+  // Create search dropdown element
+  const searchContainer = document.querySelector('.search-container');
+  if (searchContainer) {
+    const dropdown = document.createElement('div');
+    dropdown.className = 'search-dropdown glass';
+    dropdown.id = 'search-dropdown';
+    searchContainer.appendChild(dropdown);
+  }
+  
   setupEventListeners();
   
   // Header scroll class
@@ -994,6 +1004,7 @@ function setupEventListeners() {
     // Sync values between desktop and mobile search bars
     if (e.target === elements.searchInput) {
       elements.mobileSearchInput.value = e.target.value;
+      updateSearchDropdown();
     } else {
       elements.searchInput.value = e.target.value;
     }
@@ -1001,6 +1012,26 @@ function setupEventListeners() {
   };
   elements.searchInput.addEventListener('input', handleSearch);
   elements.mobileSearchInput.addEventListener('input', handleSearch);
+
+  // Close dropdown on click outside
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('search-dropdown');
+    if (dropdown && !elements.searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('active');
+    }
+  });
+
+  // Search input keydown (Enter to scroll to catalog)
+  elements.searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const dropdown = document.getElementById('search-dropdown');
+      if (dropdown) dropdown.classList.remove('active');
+      const catalogSection = document.getElementById('catalog');
+      if (catalogSection) {
+        catalogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
 
   // Keyboard accessibility for modals
   document.addEventListener('keydown', (e) => {
@@ -1201,3 +1232,84 @@ function addBundleToCart() {
   showToast('Setup Bundle successfully added with 15% discount!', 'success');
   toggleCartDrawer(); // Open cart sidebar
 }
+
+// --- SEARCH DROPDOWN LOGIC ---
+function updateSearchDropdown() {
+  const dropdown = document.getElementById('search-dropdown');
+  if (!dropdown) return;
+
+  const query = state.searchQuery.trim().toLowerCase();
+
+  if (!query) {
+    dropdown.classList.remove('active');
+    return;
+  }
+
+  // Find matches
+  const matches = PRODUCTS.filter(prod => 
+    prod.title.toLowerCase().includes(query) || 
+    prod.category.toLowerCase().includes(query) ||
+    prod.description.toLowerCase().includes(query)
+  );
+
+  dropdown.innerHTML = '';
+  dropdown.classList.add('active');
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'search-dropdown-header';
+  header.textContent = `Matching Gear (${matches.length})`;
+  dropdown.appendChild(header);
+
+  if (matches.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'search-dropdown-empty';
+    empty.textContent = 'No matching accessories found.';
+    dropdown.appendChild(empty);
+    return;
+  }
+
+  // Items (Limit to 5 for neatness)
+  const displayItems = matches.slice(0, 5);
+  displayItems.forEach(product => {
+    const item = document.createElement('div');
+    item.className = 'search-dropdown-item';
+    item.innerHTML = `
+      <img class="search-dropdown-item-img" src="${product.image}" alt="${product.title}">
+      <div class="search-dropdown-item-info">
+        <span class="search-dropdown-item-title">${product.title}</span>
+        <span class="search-dropdown-item-cat">${product.category}</span>
+      </div>
+      <span class="search-dropdown-item-price">₹${product.price.toLocaleString('en-IN')}</span>
+    `;
+
+    // Click handler to open details
+    item.addEventListener('click', () => {
+      openDetailModal(product.id);
+      dropdown.classList.remove('active');
+      elements.searchInput.value = '';
+      state.searchQuery = '';
+      elements.mobileSearchInput.value = '';
+      renderProducts();
+    });
+
+    dropdown.appendChild(item);
+  });
+
+  // Footer
+  const footer = document.createElement('div');
+  footer.className = 'search-dropdown-footer';
+  const viewAllBtn = document.createElement('button');
+  viewAllBtn.className = 'search-dropdown-view-all';
+  viewAllBtn.textContent = 'View all in Catalog';
+  viewAllBtn.addEventListener('click', () => {
+    dropdown.classList.remove('active');
+    const catalogSection = document.getElementById('catalog');
+    if (catalogSection) {
+      catalogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  footer.appendChild(viewAllBtn);
+  dropdown.appendChild(footer);
+}
+
