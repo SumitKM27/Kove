@@ -21,7 +21,7 @@ A sleek, premium, and minimal e-commerce storefront designed for workspace creat
 
 ## 📁 Codebase Structure
 
-- [`index.html`](index.html): Defines the web app layout, navigation header, product grid skeleton, slide-out cart drawer, and single-step checkout form modal.
+- [`index.html`](index.html): Defines the web app layout, navigation header, product grid skeleton, slide-out cart drawer, single-step checkout form modal, and multi-column directory footer.
 - [`app.js`](app.js): Handles state management (cart items array, filtering, search query), local storage sync, catalog rendering, and simulated checkout flow.
 - [`style.css`](style.css): Premium dark theme stylesheet (`#080c14` background, `#111827` card surfaces, and `#8b5cf6` violet accents) with clean typography and responsive design rules.
 - [`assets/`](assets/): Contains catalog product images and workspace background setup layouts.

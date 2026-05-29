@@ -563,19 +563,6 @@ function setupEventListeners() {
     if (e.target === elements.checkoutModal) closeCheckoutModal();
   });
 
-  // Newsletter Form submit
-  const newsletterForm = document.getElementById('newsletter-form');
-  if (newsletterForm) {
-    newsletterForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById('newsletter-email');
-      const val = emailInput.value.trim();
-      if (val) {
-        showToast(`Subscribed ${val} to our newsletter!`, 'success');
-        emailInput.value = '';
-      }
-    });
-  }
 
   // Escape key close modals
   document.addEventListener('keydown', (e) => {
